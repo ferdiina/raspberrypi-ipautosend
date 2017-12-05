@@ -6,6 +6,7 @@ import time
 import struct
 import smtplib
 import urllib
+import requests
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
@@ -40,7 +41,7 @@ def check_network():
            time.sleep(5)
     return True
 
-# 获得本级制定接口的ip地址
+# 获得本机接口的ip地址
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("1.1.1.1",80))
@@ -48,7 +49,20 @@ def get_ip_address():
     s.close()
     return ipaddr
 
+#利用ip138.com获取外网ip
+def get_iip_address():
+    url = r'http://2017.ip138.com/ic.asp'
+    r = requests.get(url)
+    txt = r.text
+    iipaddr = txt[txt.find("[") + 1: txt.find("]")]
+    #print('ip:' + ip)
+    return iipaddr
+
+#执行过程
 if __name__ == '__main__':
     check_network()
     ipaddr=get_ip_address()
-    sendEmail('smtp.163.com','网易邮箱账号','网易邮箱密码','邮箱邮箱地址',['收件人地址'],'IP Address Of Raspberry Pi',ipaddr)
+    iipaddr=get_iip_address()
+	#封装邮件内容
+    mail=('internal ip:'+ ipaddr+'<br>'+'internet ip:' + iipaddr)
+    sendEmail('smtp.163.com','网易邮箱账号','网易邮箱密码','邮箱邮箱地址',['收件人地址'],'IP Address Of Raspberry Pi',mail)
